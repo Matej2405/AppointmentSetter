@@ -1,5 +1,4 @@
 ﻿using Backend.Entities;
-using Backend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -12,75 +11,40 @@ namespace Backend.Data
         {
         }
 
-        public DbSet<CodingProblem> CodingProblems { get; set; }
-        public DbSet<TestCase> TestCases { get; set; }
+        public DbSet<Appointment> Appointments { get; set; }
+        public DbSet<Specializations> Specializations { get; set; }
+        public DbSet<UserSpecialization> UserSpecializations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<CodingProblem>(e =>
-            {
-                e.HasKey(cp => cp.Id);
+            // Many-to-many config: User <-> Specialization
+            modelBuilder.Entity<UserSpecialization>()
+                .HasKey(us => new { us.UserId, us.SpecializationId });
 
-                e.HasMany(cp => cp.TestCases)
-                 .WithOne()
-                 .HasForeignKey(tc => tc.CodingProblemId)
-                 .OnDelete(DeleteBehavior.Cascade);
-            });
+            modelBuilder.Entity<UserSpecialization>()
+                .HasOne(us => us.User)
+                .WithMany(u => u.UserSpecializations)
+                .HasForeignKey(us => us.UserId);
 
-            modelBuilder.Entity<CodingProblem>().HasData(
-                new CodingProblem
-                {
-                    Id = 1,
-                    Title = "Dragon's Lair: Square Grid Treasure Hunt",
-                    Description = "In the heart of the Firepeak Mountains lies the lair of an ancient dragon, guardian of a legendary treasure. To claim the hoard, adventurers must first solve the dragon’s riddle:\r\n\r\n\"A grid of magic seals, square and bright,\r\nGuards the path to treasures of light.\r\nSum the seals where row and column align,\r\nAnd the vault shall open—prove your mind!\"\r\n\r\nThe dragon conjures an n x n grid of glowing magical seals. Each seal holds an integer value. Your task is to compute the sum of the seals along the main diagonal (from the top-left to the bottom-right corner). Only then will the dragon’s barrier fall!",
-                    DifficultyMultiplier = 0.25,
-                }
-            );
+            modelBuilder.Entity<UserSpecialization>()
+                .HasOne(us => us.Specialization)
+                .WithMany(s => s.UserSpecializations)
+                .HasForeignKey(us => us.SpecializationId);
 
-            modelBuilder.Entity<TestCase>().HasData(
-                new TestCase
-                {
-                    Id = 1,
-                    CodingProblemId = 1, // Link to CodingProblem 1
-                    InputArguments = "2\n1 2\n3 4",
-                    ExpectedOutput = "5",
-                    isHidden = false
-                },
-                new TestCase
-                {
-                    Id = 2,
-                    CodingProblemId = 1,
-                    InputArguments = "3\n10 20 30\n40 50 60\n70 80 90",
-                    ExpectedOutput = "150",
-                    isHidden = false
-                },
-                new TestCase
-                {
-                    Id = 3,
-                    CodingProblemId = 1,
-                    InputArguments = "2\n5 6\n8 9",
-                    ExpectedOutput = "14",
-                    isHidden = true
-                },
-                new TestCase
-                {
-                    Id = 4,
-                    CodingProblemId = 1,
-                    InputArguments = "1\n100",
-                    ExpectedOutput = "100",
-                    isHidden = true
-                },
-                new TestCase
-                {
-                    Id = 5,
-                    CodingProblemId = 1,
-                    InputArguments = "4\n1 2 3 4\n5 6 7 8\n9 10 11 12\n13 14 15 16",
-                    ExpectedOutput = "34",
-                    isHidden = true
-                }
-            );
+            modelBuilder.Entity<Appointment>()
+                .HasOne(a => a.Doctor)
+                .WithMany(u => u.AppointmentsAsDoctor)
+                .HasForeignKey(a => a.DoctorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Appointment>()
+                .HasOne(a => a.Patient)
+                .WithMany(u => u.AppointmentsAsPatient)
+                .HasForeignKey(a => a.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }
