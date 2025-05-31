@@ -1,0 +1,10 @@
+﻿# gitignore for backend dir, after merging branches will have to be also merged with FE one
+#
+# Visual Studio files included
+
+**/obj/
+Backend.csproj.user
+.vs/
+../.vs/	
+**/bin
+**/Migrations
