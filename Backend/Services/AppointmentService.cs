@@ -80,6 +80,70 @@ namespace Backend.Services
 
             return Result<List<Appointment>>.Success(appointments);
         }
+        public async Task<Result<Appointment>> ReserveAppointmentAsync(ReserveAppointmentDto dto)
+        {
+            // Check for overlapping appointments
+            bool conflict = await _context.Appointments.AnyAsync(a =>
+                a.DoctorId == dto.DoctorId &&
+                a.Status == "Scheduled" &&
+                a.StartTime < dto.EndTime &&
+                dto.StartTime < a.EndTime
+            );
 
+            if (conflict)
+                return Result<Appointment>.Failure("Time slot is already taken.");
+
+            var appointment = new Appointment
+            {
+                Id = Guid.NewGuid(),
+                DoctorId = dto.DoctorId,
+                PatientId = dto.PatientId,
+                StartTime = dto.StartTime,
+                EndTime = dto.EndTime,
+                Status = "Scheduled"
+            };
+
+            _context.Appointments.Add(appointment);
+            await _context.SaveChangesAsync();
+
+            return Result<Appointment>.Success(appointment);
+        }
+        public async Task<Result<bool>> CancelAppointmentAsync(CancelAppointmentDto dto)
+        {
+            var appointment = await _context.Appointments.FindAsync(dto.AppointmentId);
+
+            if (appointment == null)
+                return Result<bool>.Failure("Appointment not found.");
+
+            if (appointment.Status == "Cancelled")
+                return Result<bool>.Failure("Appointment is already cancelled.");
+
+            appointment.Status = "Cancelled";
+            await _context.SaveChangesAsync();
+
+            return Result<bool>.Success(true);
+        }
+        public async Task<Result<List<Appointment>>> GetUpcomingAppointmentsForUserAsync(Guid userId)
+        {
+            var now = DateTime.UtcNow;
+
+            var appointments = await _context.Appointments
+                .Where(a => a.PatientId == userId && a.StartTime >= now && a.Status == "Scheduled")
+                .OrderBy(a => a.StartTime)
+                .ToListAsync();
+
+            return Result<List<Appointment>>.Success(appointments);
+        }
+        public async Task<Result<List<Appointment>>> GetPastAppointmentsForUserAsync(Guid userId)
+        {
+            var now = DateTime.UtcNow;
+
+            var appointments = await _context.Appointments
+                .Where(a => a.PatientId == userId && a.StartTime < now && a.Status == "Scheduled")
+                .OrderByDescending(a => a.StartTime)
+                .ToListAsync();
+
+            return Result<List<Appointment>>.Success(appointments);
+        }
     }
 }

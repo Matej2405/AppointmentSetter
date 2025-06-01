@@ -12,5 +12,7 @@ namespace Backend.Services.Interfaces
 
         Task<Result<List<Specializations>>> GetDoctorSpecializationsAsync(Guid doctorId);
 
+        Task<Result<List<UserDto>>> SearchDoctorsAsync(DoctorFilterDto filter);
+
     }
 }

@@ -40,6 +40,41 @@ namespace Backend.Controllers
 
             return Ok(result.Data);
         }
+        [HttpPost("reserve")]
+        public async Task<IActionResult> ReserveAppointment([FromBody] ReserveAppointmentDto dto)
+        {
+            var result = await _appointmentService.ReserveAppointmentAsync(dto);
+            if (!result.Succeeded)
+                return BadRequest(result.Message);
 
+            return Ok(result.Data);
+        }
+        [HttpPost("cancel")]
+        public async Task<IActionResult> CancelAppointment([FromBody] CancelAppointmentDto dto)
+        {
+            var result = await _appointmentService.CancelAppointmentAsync(dto);
+            if (!result.Succeeded)
+                return BadRequest(result.Message);
+
+            return Ok();
+        }
+        [HttpGet("user/{userId}/upcoming")]
+        public async Task<IActionResult> GetUserUpcomingAppointments(Guid userId)
+        {
+            var result = await _appointmentService.GetUpcomingAppointmentsForUserAsync(userId);
+            if (!result.Succeeded)
+                return BadRequest(result.Message);
+
+            return Ok(result.Data);
+        }
+        [HttpGet("user/{userId}/past")]
+        public async Task<IActionResult> GetUserPastAppointments(Guid userId)
+        {
+            var result = await _appointmentService.GetPastAppointmentsForUserAsync(userId);
+            if (!result.Succeeded)
+                return BadRequest(result.Message);
+
+            return Ok(result.Data);
+        }
     }
 }

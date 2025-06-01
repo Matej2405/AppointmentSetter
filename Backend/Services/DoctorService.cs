@@ -53,5 +53,46 @@ namespace Backend.Services
 
             return Result<List<Specializations>>.Success(specializations);
         }
+        public async Task<Result<List<UserDto>>> SearchDoctorsAsync(DoctorFilterDto filter)
+        {
+            // Only users who are doctors
+            var doctorRoleId = await _context.Roles
+                .Where(r => r.Name == "Doctor")
+                .Select(r => r.Id)
+                .FirstAsync();
+
+            var query = _context.Users
+                .Where(u => u.UserRoles.Any(ur => ur.RoleId == doctorRoleId));
+
+            // Filter by specialization
+            if (filter.SpecializationId.HasValue)
+                query = query.Where(u =>
+                    u.UserSpecializations.Any(us => us.SpecializationId == filter.SpecializationId.Value));
+
+            // Filter by location
+            if (!string.IsNullOrWhiteSpace(filter.Location))
+                query = query.Where(u => u.Location == filter.Location);
+
+            // Filter by availability
+            if (filter.AvailableFrom.HasValue && filter.AvailableTo.HasValue)
+            {
+                query = query.Where(u =>
+                    u.Availabilities.Any(a =>
+                        a.StartTime <= filter.AvailableFrom.Value &&
+                        a.EndTime >= filter.AvailableTo.Value
+                    ));
+            }
+
+            var doctors = await query.Select(u => new UserDto
+            {
+                Id = u.Id,
+                Username = u.UserName,
+                Email = u.Email,
+                // Add more UserDto properties if needed
+            }).ToListAsync();
+
+            return Result<List<UserDto>>.Success(doctors);
+        }
+
     }
 }
