@@ -16,7 +16,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers(); // Registers all controllers in the project.
 
 // JWT bearer config vars
-
+Console.WriteLine("JWT Secret: " + builder.Configuration["Jwt:Secret"]);
+Console.WriteLine("DbPassword: " + builder.Configuration["DbPassword"]);
 var secret = builder.Configuration["Jwt:Secret"];
 if(string.IsNullOrEmpty(secret))
 {
@@ -48,12 +49,9 @@ if(connectionStringTemplate == null)
 {
     throw new ArgumentNullException("Database connection string (no password) is invalid");
 }
-
-var finalConnectionString = connectionStringTemplate.Replace("{DbPassword}", dbPassword);
-
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseSqlServer(finalConnectionString);
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddSwaggerGen(option =>
@@ -84,17 +82,18 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
+
 // Custom application services.
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddScoped<ITokenProviderService, TokenProviderService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ICodeExecutionService, CodeExecutionService>();
-builder.Services.AddScoped<ICodeExecutionService, CodeExecutionService>();
-builder.Services.AddScoped<ICodingProblemRepository, CodingProblemRepository>();
-builder.Services.AddScoped<IProblemEvaluationService, ProblemEvaluationService>();
-builder.Services.AddScoped<ICodingProblemService, CodingProblemService>();
-builder.Services.AddScoped<IRewardService, RewardService>();
+//builder.Services.AddScoped<ICodeExecutionService, CodeExecutionService>();
+//builder.Services.AddScoped<ICodeExecutionService, CodeExecutionService>();
+//builder.Services.AddScoped<ICodingProblemRepository, CodingProblemRepository>();
+//builder.Services.AddScoped<IProblemEvaluationService, ProblemEvaluationService>();
+//builder.Services.AddScoped<ICodingProblemService, CodingProblemService>();
+//builder.Services.AddScoped<IRewardService, RewardService>();
 
 
 // Basic identity framework options.
@@ -122,7 +121,7 @@ builder.Services.AddIdentityCore<User>(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserManager<User>>();
 builder.Services.AddScoped<SignInManager<User>>();
-builder.Services.AddScoped<ICodingProblemService, CodingProblemService>();
+//builder.Services.AddScoped<ICodingProblemService, CodingProblemService>();
 
 builder.Services.AddCors(options =>
 {

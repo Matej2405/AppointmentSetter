@@ -1,6 +1,5 @@
 ﻿using Backend.Entities;
 using Backend.Models;
-using Backend.Models.Leaderboard;
 using Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -49,7 +48,7 @@ namespace Backend.Services
             }
         }
 
-        public async Task<Result<LeaderboardDTO>> GetLeaderboardAsync()
+        /*public async Task<Result<LeaderboardDTO>> GetLeaderboardAsync()
         {
             try
             {
@@ -78,7 +77,7 @@ namespace Backend.Services
                 return Result<LeaderboardDTO>.Failure($"Failed to fetch leaderboard: {e.Message}");
             }
         }
-
+        */
         public async Task<Result<UserDto>> GetUserDtoByEmail(string email)
         {
             try
