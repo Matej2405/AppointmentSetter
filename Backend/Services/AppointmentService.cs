@@ -69,5 +69,17 @@ namespace Backend.Services
                 return Result<List<Appointment>>.Failure(ex.Message);
             }
         }
+        public async Task<Result<List<Appointment>>> GetUpcomingAppointmentsForDoctorAsync(Guid doctorId)
+        {
+            var now = DateTime.UtcNow;
+
+            var appointments = await _context.Appointments
+                .Where(a => a.DoctorId == doctorId && a.StartTime >= now)
+                .OrderBy(a => a.StartTime)
+                .ToListAsync();
+
+            return Result<List<Appointment>>.Success(appointments);
+        }
+
     }
 }

@@ -14,6 +14,7 @@ namespace Backend.Data
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<Specializations> Specializations { get; set; }
         public DbSet<UserSpecialization> UserSpecializations { get; set; }
+        public DbSet<Availability> Availabilities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

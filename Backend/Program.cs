@@ -94,6 +94,8 @@ builder.Services.AddSwaggerGen(option =>
 // Custom application services.
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddScoped<ITokenProviderService, TokenProviderService>();
+builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
+
 // No change here if using constructor injection, DI will resolve both IConfiguration and UserManager<User>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
