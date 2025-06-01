@@ -30,5 +30,16 @@ namespace Backend.Controllers
 
             return Ok(result.Data);
         }
+        [HttpGet("doctor/{doctorId}/upcoming")]
+        [Authorize(Roles = "Doctor,Admin")] // optional, but recommended
+        public async Task<IActionResult> GetDoctorUpcomingAppointments(Guid doctorId)
+        {
+            var result = await _appointmentService.GetUpcomingAppointmentsForDoctorAsync(doctorId);
+            if (!result.Succeeded)
+                return BadRequest(result.Message);
+
+            return Ok(result.Data);
+        }
+
     }
 }

@@ -7,6 +7,8 @@ namespace Backend.Services.Interfaces
     {
         Task<Result<List<Appointment>>> GetFilteredAppointmentsAsync(AppointmentFilterDto filter);
         Task<Result<List<Appointment>>> GetAppointmentsAsync(AppointmentFilterDto filter);
+        Task<Result<List<Appointment>>> GetUpcomingAppointmentsForDoctorAsync(Guid doctorId);
+
 
     }
 }
