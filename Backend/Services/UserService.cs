@@ -48,36 +48,7 @@ namespace Backend.Services
             }
         }
 
-        /*public async Task<Result<LeaderboardDTO>> GetLeaderboardAsync()
-        {
-            try
-            {
-                var users = await _userManager.Users
-                    .OrderByDescending(u => u.XP) 
-                    .Select(u => new LeaderboardEntryDTO
-                    {
-                        UserId = u.Id,
-                        Username = u.UserName,
-                        Xp = u.XP,
-                        Coins = u.Coins
-                    })
-                    .ToListAsync();
-
-                if (!users.Any())
-                {
-                    return Result<LeaderboardDTO>.Failure("No leaderboard data available.");
-                }
-
-                var leaderboard = new LeaderboardDTO { Entries = users };
-
-                return Result<LeaderboardDTO>.Success(leaderboard);
-            }
-            catch (Exception e)
-            {
-                return Result<LeaderboardDTO>.Failure($"Failed to fetch leaderboard: {e.Message}");
-            }
-        }
-        */
+      
         public async Task<Result<UserDto>> GetUserDtoByEmail(string email)
         {
             try
@@ -94,9 +65,7 @@ namespace Backend.Services
                     Id = user.Id,
                     Username = user.UserName,
                     Email = user.Email,
-                                    // Ensure User entity has this property or adjust accordingly
-                    Xp = user.XP,       // Assuming entity property is 'XP'
-                    Coins = user.Coins
+                                    // Ensure User entity has this property or adjust accordingl
                 };
 
                 return Result<UserDto>.Success(userDto);
@@ -126,5 +95,35 @@ namespace Backend.Services
                 return Result<bool>.Failure(e.Message);
             }
         }
+
+        public async Task<Result<UserWithRolesDto>> GetUserWithRolesDtoByEmail(string email)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+
+                if (user == null)
+                {
+                    return Result<UserWithRolesDto>.Failure("User not found by email");
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+
+                var userDto = new UserWithRolesDto
+                {
+                    Id = user.Id,
+                    Username = user.UserName,
+                    Email = user.Email,
+                    Roles = roles.ToList()
+                };
+
+                return Result<UserWithRolesDto>.Success(userDto);
+            }
+            catch (Exception e)
+            {
+                return Result<UserWithRolesDto>.Failure(e.Message);
+            }
+        }
+
     }
 }

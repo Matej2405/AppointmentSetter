@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Backend.Seed;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +19,11 @@ builder.Services.AddControllers(); // Registers all controllers in the project.
 
 // JWT bearer config vars
 Console.WriteLine("JWT Secret: " + builder.Configuration["Jwt:Secret"]);
-Console.WriteLine("DbPassword: " + builder.Configuration["DbPassword"]);
+Console.WriteLine("Issuer: " + builder.Configuration["Jwt:Issuer"]);
+Console.WriteLine("Audience: " + builder.Configuration["Jwt:Audience"]);
+
+
+
 var secret = builder.Configuration["Jwt:Secret"];
 if(string.IsNullOrEmpty(secret))
 {
@@ -49,9 +55,11 @@ if(connectionStringTemplate == null)
 {
     throw new ArgumentNullException("Database connection string (no password) is invalid");
 }
+var finalConnectionString = connectionStringTemplate.Replace("{DbPassword}", dbPassword);
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseSqlServer(finalConnectionString);
 });
 
 builder.Services.AddSwaggerGen(option =>
@@ -86,14 +94,9 @@ builder.Services.AddSwaggerGen(option =>
 // Custom application services.
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddScoped<ITokenProviderService, TokenProviderService>();
+// No change here if using constructor injection, DI will resolve both IConfiguration and UserManager<User>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
-//builder.Services.AddScoped<ICodeExecutionService, CodeExecutionService>();
-//builder.Services.AddScoped<ICodeExecutionService, CodeExecutionService>();
-//builder.Services.AddScoped<ICodingProblemRepository, CodingProblemRepository>();
-//builder.Services.AddScoped<IProblemEvaluationService, ProblemEvaluationService>();
-//builder.Services.AddScoped<ICodingProblemService, CodingProblemService>();
-//builder.Services.AddScoped<IRewardService, RewardService>();
 
 
 // Basic identity framework options.
@@ -121,7 +124,7 @@ builder.Services.AddIdentityCore<User>(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserManager<User>>();
 builder.Services.AddScoped<SignInManager<User>>();
-//builder.Services.AddScoped<ICodingProblemService, CodingProblemService>();
+
 
 builder.Services.AddCors(options =>
 {
@@ -166,6 +169,14 @@ app.UseCors("AllowReactApp");
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await DbSeeder.SeedRolesAndAdminAsync(services);
+}
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
