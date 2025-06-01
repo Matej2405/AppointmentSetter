@@ -43,5 +43,16 @@ namespace Backend.Controllers
 
             return Ok();
         }
+        [HttpGet("search")]
+        [AllowAnonymous] // or [Authorize] if you want only logged-in users to search
+        public async Task<IActionResult> SearchDoctors([FromQuery] DoctorFilterDto filter)
+        {
+            var result = await _doctorService.SearchDoctorsAsync(filter);
+            if (!result.Succeeded)
+                return BadRequest(result.Message);
+
+            return Ok(result.Data);
+        }
+
     }
 }
