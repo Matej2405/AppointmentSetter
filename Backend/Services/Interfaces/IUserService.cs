@@ -9,5 +9,7 @@ namespace Backend.Services.Interfaces
         public Task<Result<User>> GetUserByIdAsync(Guid id);
         public Task<Result<UserDto>> GetUserDtoByEmail(string email);
         public Task<Result<bool>> UpdateUserByIdAsync(User user);
+
+        public Task<Result<UserWithRolesDto>> GetUserWithRolesDtoByEmail(string email);
     }
 }

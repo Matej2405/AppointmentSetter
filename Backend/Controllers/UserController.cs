@@ -27,13 +27,9 @@ namespace Backend.Controllers
             return Ok(userResult.Data);
         }
         [HttpGet("current")]
-       
         public async Task<IActionResult> GetCurrentUser(string email)
         {
-            // Get the current user's email from the JWT token
-            var userEmail = email;
-
-            var userResult = await _userService.GetUserDtoByEmail(userEmail);
+            var userResult = await _userService.GetUserWithRolesDtoByEmail(email); // changed here
 
             if (!userResult.Succeeded)
             {
@@ -42,5 +38,6 @@ namespace Backend.Controllers
 
             return Ok(userResult.Data);
         }
+
     }
 }

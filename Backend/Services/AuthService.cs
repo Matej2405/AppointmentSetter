@@ -27,6 +27,10 @@ namespace Backend.Services
                     var existingUser = await _userManager.FindByEmailAsync(logInDto.EmailUsername);
                     if (existingUser == null) return Result<User>.Failure("No user found with specified Email.");
 
+                    if (!existingUser.IsActive)
+                        return Result<User>.Failure("Account is deactivated.");
+
+
                     var result = await _signinManager.CheckPasswordSignInAsync(existingUser, logInDto.Password, false);
 
                     if (result.Succeeded) return Result<User>.Success(existingUser);
@@ -36,6 +40,10 @@ namespace Backend.Services
                 {
                     var existingUser = await _userManager.FindByNameAsync(logInDto.EmailUsername);
                     if (existingUser == null) return Result<User>.Failure("No user found with specified Username.");
+
+
+                    if (!existingUser.IsActive)
+                        return Result<User>.Failure("Account is deactivated.");
 
                     var result = await _signinManager.CheckPasswordSignInAsync(existingUser, logInDto.Password, false);
 
